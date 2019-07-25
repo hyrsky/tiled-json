@@ -1,0 +1,23 @@
+[package]
+name = "tiled-json"
+description = "A rust crate for loading maps created by the Tiled editor"
+version = "0.1.0"
+readme = "README.md"
+license = "MIT"
+edition = "2018"
+
+keywords = ["tiled", "tmx", "map"]
+
+[lib]
+name = "tiled_json"
+path = "src/lib.rs"
+
+[[example]]
+name = "example"
+path = "examples/main.rs"
+
+[dependencies]
+base64  = "0.10"
+libflate = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
