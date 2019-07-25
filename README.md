@@ -26,7 +26,7 @@ fn main() {
 
 ## Licences
 
-Licenced under [MIT](LICENCE)
+Licenced under [MIT](LICENSE).
 
 ### Assets
 
