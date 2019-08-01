@@ -34,11 +34,11 @@ impl std::error::Error for TiledError {
         }
     }
 
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         match *self {
-            TiledError::ParsingError(ref e) => Some(e as &std::error::Error),
-            TiledError::DecompressingError(ref e) => Some(e as &std::error::Error),
-            TiledError::Base64DecodingError(ref e) => Some(e as &std::error::Error),
+            TiledError::ParsingError(ref e) => Some(e as &dyn std::error::Error),
+            TiledError::DecompressingError(ref e) => Some(e as &dyn std::error::Error),
+            TiledError::Base64DecodingError(ref e) => Some(e as &dyn std::error::Error),
             _ => None,
         }
     }

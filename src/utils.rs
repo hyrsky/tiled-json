@@ -28,7 +28,7 @@ pub fn decode_zlib(data: Vec<u8>) -> Result<Vec<u8>, TiledError> {
 
     Decoder::new(&data[..])
         .and_then(|mut decoder| decoder.read_to_end(&mut buffer))
-        .map_err(|e| TiledError::DecompressingError(e))?;
+        .map_err(TiledError::DecompressingError)?;
 
     Ok(buffer)
 }
@@ -39,7 +39,7 @@ pub fn decode_gzip(data: Vec<u8>) -> Result<Vec<u8>, TiledError> {
 
     Decoder::new(&data[..])
         .and_then(|mut decoder| decoder.read_to_end(&mut buffer))
-        .map_err(|e| TiledError::DecompressingError(e))?;
+        .map_err(TiledError::DecompressingError)?;
 
     Ok(buffer)
 }
@@ -74,10 +74,9 @@ pub fn decode_base64_tiledata(
 
     let data = data
         .as_str()
-        .ok_or(TiledError::Other(format!("Improperly formatted data")))?;
+        .ok_or_else(|| TiledError::Other("Improperly formatted data".to_string()))?;
 
-    let bytes = base64::decode(data.trim().as_bytes())
-        .map_err(|err| TiledError::Base64DecodingError(err))?;
+    let bytes = base64::decode(data.trim().as_bytes()).map_err(TiledError::Base64DecodingError)?;
 
     let bytes = match compression {
         Some(Compression::Gzip) => decode_gzip(bytes),
@@ -112,7 +111,7 @@ pub fn decode_csv_tiledata(data: Value, tiles: &mut Vec<u32>) -> Result<(), Tile
 
         Ok(())
     } else {
-        Err(TiledError::Other(format!("Improperly formatted data")))
+        Err(TiledError::Other("Improperly formatted data".to_string()))
     }
 }
 
@@ -135,7 +134,7 @@ impl FromStr for Color {
     type Err = TiledError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = if s.starts_with("#") { &s[1..] } else { s };
+        let s = if s.starts_with('#') { &s[1..] } else { s };
         let mut color = [std::u8::MAX; 4];
 
         // Tiled colors are ither #rrggbb or #aarrggbb ('#' is trimmed above).
@@ -166,6 +165,6 @@ impl<'de> Deserialize<'de> for Color {
         D: Deserializer<'de>,
     {
         Color::from_str(&(Deserialize::deserialize(deserializer) as Result<String, _>)?)
-            .map_err(|err| de::Error::custom(err))
+            .map_err(de::Error::custom)
     }
 }

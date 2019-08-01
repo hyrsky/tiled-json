@@ -90,29 +90,21 @@ pub enum ObjectShape {
 impl ObjectShape {
     fn from(data: ObjectShapeData) -> Self {
         match data {
-            ObjectShapeData::Point { point: _ } => ObjectShape::Point,
-            ObjectShapeData::Rect { width, height } => ObjectShape::Rect {
-                width: width,
-                height: height,
-            },
-            ObjectShapeData::Ellipse {
-                ellipse: _,
-                width,
-                height,
-            } => ObjectShape::Ellipse {
-                width: width,
-                height: height,
-            },
-            ObjectShapeData::Polyline { points } => ObjectShape::Polyline { points: points },
-            ObjectShapeData::Polygon { points } => ObjectShape::Polygon { points: points },
+            ObjectShapeData::Point { .. } => ObjectShape::Point,
+            ObjectShapeData::Rect { width, height } => ObjectShape::Rect { width, height },
+            ObjectShapeData::Ellipse { width, height, .. } => {
+                ObjectShape::Ellipse { width, height }
+            }
+            ObjectShapeData::Polyline { points } => ObjectShape::Polyline { points },
+            ObjectShapeData::Polygon { points } => ObjectShape::Polygon { points },
             ObjectShapeData::Text {
                 width,
                 height,
                 text,
             } => ObjectShape::Text {
-                width: width,
-                height: height,
-                text: text,
+                width,
+                height,
+                text,
             },
         }
     }
@@ -223,7 +215,7 @@ impl<'de> Deserialize<'de> for TileLayer {
     {
         // Deserialize to intermediary struct TileLayerData to allow
         // decompressing and decoding tile data.
-        TileLayer::from(Deserialize::deserialize(deserializer)?).map_err(|err| Error::custom(err))
+        TileLayer::from(Deserialize::deserialize(deserializer)?).map_err(Error::custom)
     }
 }
 
@@ -280,7 +272,7 @@ pub struct Map {
 
 /// Read buffer hopefully containing a Tiled map and try to parse it.
 pub fn parse<R: Read>(reader: R) -> Result<Map, TiledError> {
-    serde_json::from_reader(reader).map_err(|err| TiledError::ParsingError(err))
+    serde_json::from_reader(reader).map_err(TiledError::ParsingError)
 }
 
 /// Read file hopefully containing a Tiled map and try to parse it.
@@ -309,6 +301,7 @@ mod tests {
             .unwrap();
     }
 
+    #[allow(clippy::approx_constant)]
     #[test]
     fn test_properties() {
         let map = parse_file(&Path::new("assets/map.json")).unwrap();
